@@ -1,0 +1,73 @@
+├── backend
+│   ├── .env
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── api
+│   │   │   ├── __init__.py
+│   │   │   ├── dashboard.py
+│   │   │   ├── products.py
+│   │   │   └── users.py
+│   │   ├── database.py
+│   │   ├── main.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── category.py
+│   │   │   ├── product.py
+│   │   │   └── user.py
+│   │   ├── schemas
+│   │   │   ├── __init__.py
+│   │   │   ├── product.py
+│   │   │   └── user.py
+│   │   ├── services
+│   │   └── utils
+│   │       └── strategies.py
+│   ├── files.ipynb
+│   ├── init_db.py
+│   ├── requirements.txt
+│   └── tests
+│       └── test_items.py
+├── docker-compose.yml
+├── frontend
+│   ├── .gitignore
+│   ├── README.md
+│   ├── eslint.config.mjs
+│   ├── next-env.d.ts
+│   ├── next.config.js
+│   ├── next.config.ts
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── postcss.config.mjs
+│   ├── public
+│   │   ├── file.svg
+│   │   ├── globe.svg
+│   │   ├── next.svg
+│   │   ├── vercel.svg
+│   │   └── window.svg
+│   ├── src
+│   │   ├── app
+│   │   │   ├── dashboard
+│   │   │   ├── favicon.ico
+│   │   │   ├── globals.css
+│   │   │   ├── layout.tsx
+│   │   │   ├── login
+│   │   │   ├── page.tsx
+│   │   │   ├── products
+│   │   │   └── register
+│   │   ├── components
+│   │   │   ├── Example.tsx
+│   │   │   ├── NavBar.tsx
+│   │   │   └── ProductTable.tsx
+│   │   ├── hooks
+│   │   │   └── useProducts.ts
+│   │   ├── middleware.ts
+│   │   ├── providers
+│   │   │   ├── Providers.tsx
+│   │   │   └── QueryProvider.tsx
+│   │   └── types
+│   │       └── product.ts
+│   ├── tailwind.config.js
+│   └── tsconfig.json
+├── information.ipynb
+├── package-lock.json
+└── project_tree.txt
