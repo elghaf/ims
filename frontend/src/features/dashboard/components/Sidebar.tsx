@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useCurrentUser } from "../../auth/hooks/useAuth";
@@ -12,14 +12,76 @@ import {
     BellIcon,
     CogIcon,
     ArrowLeftOnRectangleIcon,
+    ChartBarIcon,
+    UserGroupIcon,
+    Bars3Icon,
+    XMarkIcon,
+    ChevronDownIcon,
 } from "@heroicons/react/24/outline";
+
+interface NavItemProps {
+    href: string;
+    icon: React.ElementType;
+    title: string;
+    badge?: number;
+}
+
+const NavItem = ({ href, icon: Icon, title, badge }: NavItemProps) => {
+    const pathname = usePathname();
+    const isActive = pathname === href;
+
+    return (
+        <Link 
+            href={href} 
+            className={`
+                flex items-center px-3 py-2 rounded-lg transition-all duration-200 ease-in-out
+                group relative
+                ${isActive 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'text-gray-300 hover:bg-gray-700/50'}
+            `}
+        >
+            <Icon className={`w-5 h-5 mr-3 transition-colors ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-white'}`} />
+            <span className="flex-1">{title}</span>
+            {badge !== undefined && (
+                <span className={`
+                    px-2 py-1 text-xs rounded-full
+                    ${isActive 
+                        ? 'bg-white text-indigo-600' 
+                        : 'bg-gray-700 text-gray-300'}
+                `}>
+                    {badge}
+                </span>
+            )}
+            {isActive && (
+                <div className="absolute inset-y-0 -right-1 w-1 bg-indigo-400 rounded-l-full" />
+            )}
+        </Link>
+    );
+};
+
+const NavSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="space-y-1">
+        <h3 className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            {title}
+        </h3>
+        <div className="space-y-1">
+            {children}
+        </div>
+    </div>
+);
 
 export default function Sidebar() {
     const [isOpen, setIsOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const router = useRouter();
-    const pathname = usePathname();
     const { user } = useCurrentUser();
     const { data: stats } = useDashboardStats();
+
+    // Close sidebar on mobile when route changes
+    useEffect(() => {
+        setIsOpen(false);
+    }, [router]);
 
     const handleLogout = () => {
         localStorage.removeItem("access_token");
@@ -27,124 +89,140 @@ export default function Sidebar() {
         router.push("/auth/login");
     };
 
-    const toggleSidebar = () => {
-        setIsOpen(!isOpen);
-    };
-
-    const isActivePath = (path: string) => {
-        return pathname === path;
-    };
-
-    const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-        <Link 
-            href={href} 
-            className={`flex items-center p-2 rounded transition-colors ${
-                isActivePath(href) 
-                    ? 'bg-gray-700 text-white' 
-                    : 'hover:bg-gray-700 text-gray-300 hover:text-white'
-            }`}
-            onClick={() => setIsOpen(false)} // Close mobile menu when clicking a link
-        >
-            {children}
-        </Link>
-    );
-
     return (
         <>
-            {/* Hamburger Menu for Mobile */}
-            <button
-                className="md:hidden p-4 text-gray-600 focus:outline-none"
-                onClick={toggleSidebar}
-            >
-                <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden fixed top-0 left-0 m-4 z-50">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white focus:outline-none"
                 >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                    />
-                </svg>
-            </button>
+                    {isOpen ? (
+                        <XMarkIcon className="h-6 w-6" />
+                    ) : (
+                        <Bars3Icon className="h-6 w-6" />
+                    )}
+                </button>
+            </div>
 
             {/* Sidebar */}
-            <div
-                className={`fixed inset-y-0 left-0 z-30 w-64 bg-gray-800 text-white transform ${
-                    isOpen ? "translate-x-0" : "-translate-x-full"
-                } md:translate-x-0 transition-transform duration-300 ease-in-out md:fixed md:inset-y-0 md:left-0 md:w-64 flex flex-col`}
-            >
+            <div className={`
+                fixed inset-y-0 left-0 z-40
+                w-64 bg-gray-900 transform transition-transform duration-300 ease-in-out
+                lg:translate-x-0 lg:static lg:inset-0
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+                ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
+            `}>
                 {/* Sidebar Header */}
-                <div className="p-4 border-b border-gray-700">
-                    <h2 className="text-xl font-semibold">IMS Dashboard</h2>
-                    {user && (
-                        <p className="text-sm text-gray-400 mt-1">
-                            Welcome, {user.username}
-                        </p>
-                    )}
-                </div>
-
-                {/* Navigation Links */}
-                <nav className="flex-1 p-4 space-y-2">
-                    <NavLink href="/dashboard">
-                        <HomeIcon className="w-5 h-5 mr-2" />
-                        Dashboard
-                    </NavLink>
-                    <NavLink href="/products">
-                        <CubeIcon className="w-5 h-5 mr-2" />
-                        Products
-                    </NavLink>
-                    <NavLink href="/categories">
-                        <TagIcon className="w-5 h-5 mr-2" />
-                        Categories
-                    </NavLink>
-                    <NavLink href="/stock-alerts">
-                        <BellIcon className="w-5 h-5 mr-2" />
-                        Stock Alerts
-                    </NavLink>
-                    <NavLink href="/settings">
-                        <CogIcon className="w-5 h-5 mr-2" />
-                        Settings
-                    </NavLink>
-                </nav>
-
-                {/* Quick Stats Overview */}
-                <div className="p-4 border-t border-gray-700">
-                    <h3 className="text-sm font-medium text-gray-400 mb-2">Quick Stats</h3>
-                    <div className="space-y-2 text-sm">
-                        <p>
-                            Total Products: <span className="font-semibold">{stats?.total_products ?? 0}</span>
-                        </p>
-                        <p>
-                            Low Stock: <span className="font-semibold">{stats?.low_stock ?? 0}</span>
-                        </p>
-                        <p>
-                            Categories: <span className="font-semibold">{stats?.total_categories ?? 0}</span>
-                        </p>
+                <div className="flex items-center justify-between h-16 px-4 bg-gray-800">
+                    <div className={`flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
+                        <img
+                            src="/logo.svg"
+                            alt="Logo"
+                            className="h-8 w-8"
+                        />
+                        {!isCollapsed && (
+                            <span className="ml-2 text-xl font-semibold text-white">IMS</span>
+                        )}
                     </div>
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="hidden lg:block p-1 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white"
+                    >
+                        <ChevronDownIcon className={`h-5 w-5 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`} />
+                    </button>
                 </div>
 
-                {/* Logout Button */}
-                <div className="p-4 border-t border-gray-700">
+                {/* Sidebar Content */}
+                <div className="flex flex-col h-[calc(100%-4rem)] p-4 space-y-6 overflow-y-auto">
+                    {/* User Profile */}
+                    {!isCollapsed && (
+                        <div className="flex items-center space-x-3 px-3 py-4 bg-gray-800/50 rounded-lg">
+                            <div className="flex-shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                                    <span className="text-white text-lg font-semibold">
+                                        {user?.username?.[0]?.toUpperCase()}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-white truncate">
+                                    {user?.username}
+                                </p>
+                                <p className="text-xs text-gray-400 truncate">
+                                    {user?.email}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Navigation */}
+                    <nav className="space-y-6">
+                        <NavSection title={isCollapsed ? "" : "Main"}>
+                            <NavItem href="/dashboard" icon={HomeIcon} title={isCollapsed ? "" : "Dashboard"} />
+                            <NavItem href="/products" icon={CubeIcon} title={isCollapsed ? "" : "Products"} badge={stats?.total_products} />
+                            <NavItem href="/categories" icon={TagIcon} title={isCollapsed ? "" : "Categories"} />
+                        </NavSection>
+
+                        <NavSection title={isCollapsed ? "" : "Monitoring"}>
+                            <NavItem 
+                                href="/stock-alerts" 
+                                icon={BellIcon} 
+                                title={isCollapsed ? "" : "Stock Alerts"} 
+                                badge={stats?.low_stock}
+                            />
+                            <NavItem href="/analytics" icon={ChartBarIcon} title={isCollapsed ? "" : "Analytics"} />
+                        </NavSection>
+
+                        <NavSection title={isCollapsed ? "" : "Administration"}>
+                            <NavItem href="/users" icon={UserGroupIcon} title={isCollapsed ? "" : "Users"} />
+                            <NavItem href="/settings" icon={CogIcon} title={isCollapsed ? "" : "Settings"} />
+                        </NavSection>
+                    </nav>
+
+                    {/* Quick Stats */}
+                    {!isCollapsed && (
+                        <div className="mt-auto space-y-2 p-4 bg-gray-800/50 rounded-lg">
+                            <h3 className="text-sm font-medium text-gray-400">System Status</h3>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div className="flex flex-col">
+                                    <span className="text-gray-400">Products</span>
+                                    <span className="text-white font-medium">{stats?.total_products ?? 0}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-gray-400">Low Stock</span>
+                                    <span className="text-orange-400 font-medium">{stats?.low_stock ?? 0}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-gray-400">Categories</span>
+                                    <span className="text-white font-medium">{stats?.total_categories ?? 0}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Logout Button */}
                     <button
                         onClick={handleLogout}
-                        className="flex items-center w-full p-2 bg-red-600 rounded hover:bg-red-700 transition-colors"
+                        className={`
+                            flex items-center justify-center px-3 py-2 
+                            text-sm font-medium text-white
+                            bg-red-600 rounded-lg hover:bg-red-700 
+                            transition-colors duration-150
+                            ${isCollapsed ? 'w-10 h-10' : 'w-full'}
+                        `}
                     >
-                        <ArrowLeftOnRectangleIcon className="w-5 h-5 mr-2" />
-                        Logout
+                        <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+                        {!isCollapsed && <span className="ml-2">Logout</span>}
                     </button>
                 </div>
             </div>
 
-            {/* Overlay for Mobile */}
+            {/* Overlay */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black opacity-50 z-20 md:hidden"
-                    onClick={toggleSidebar}
+                    className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+                    onClick={() => setIsOpen(false)}
                 />
             )}
         </>
