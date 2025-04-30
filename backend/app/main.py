@@ -7,6 +7,8 @@ from .features.dashboard.router import router as dashboard_router
 from .features.categories.router import router as categories_router
 from .features.stock_alerts.router import router as stock_alerts_router
 
+
+
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
