@@ -4,6 +4,7 @@ from app.api.users import pwd_context
 from app import models
 
 
+
 def init_db():
     Base.metadata.create_all(bind=engine)
     
